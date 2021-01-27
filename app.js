@@ -44,7 +44,7 @@ App({
    */
   setApiRoot() {
     let App = this;
-    App.api_root = `${siteInfo.siteroot}index.php?s=/api/`;
+    App.api_root = `${siteInfo.siteroot}`;
   },
 
   /**
@@ -146,15 +146,15 @@ App({
             App.showError('网络请求出错');
             return false;
           }
-          if (res.data.code === -1) {
+          if (res.data.success) {
+            success && success(res.data);
+          } else if (res.data.errorCode === -1) {
             // 登录态失效, 重新登录
             wx.hideNavigationBarLoading();
             App.doLogin();
-          } else if (res.data.code === 0) {
-            App.showError(res.data.msg);
-            return false;
           } else {
-            success && success(res.data);
+            App.showError(res.data.errorMsg);
+            return false;
           }
         },
         fail(res) {
@@ -196,19 +196,20 @@ App({
           App.showError('网络请求出错');
           return false;
         }
-        if (res.data.code === -1) {
+        if (res.data.success) {
+          success && success(res.data);
+        } else if (res.data.errorCode === -1) {
           // 登录态失效, 重新登录
           App.doLogin(() => {
             App._post_form(url, data, success, fail);
           });
           return false;
-        } else if (res.data.code === 0) {
+        } else {
           App.showError(res.data.msg, () => {
             fail && fail(res);
           });
           return false;
         }
-        success && success(res.data);
       },
       fail(res) {
         // console.log(res);
